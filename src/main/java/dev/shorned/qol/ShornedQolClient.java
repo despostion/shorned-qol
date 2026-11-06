@@ -29,6 +29,7 @@ public class ShornedQolClient implements ClientModInitializer {
     public void onInitializeClient() {
         Config.load();
         StatsManager.load();
+        dev.shorned.qol.waypoint.WaypointManager.load();
 
         ClientReceiveMessageEvents.GAME.register(ChatRouter::onGame);
 
