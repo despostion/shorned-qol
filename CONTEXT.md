@@ -32,9 +32,8 @@ putting detailed findings in AUDIT.md. Do not store credentials or private game 
 
 ## GitHub delivery
 
-- Local commits: 2130cb8 (build/test infrastructure), 6d1755f (fixes/documentation).
-- Push to maintenance/0.2.2-audit and main rejected with HTTP 403: authenticated account m4rkpe
-  lacks write permission to despostion/shorned-qol. Neither remote branch was changed.
-- Resume by granting that account write access or authenticating an authorized account, then push
-  the existing branch normally. Do not recreate the changes or force-push.
-- Transfer artifacts are under build/handoff (patch series and Git bundle); generated files are ignored.
+- Write access confirmed on 2026-11-06. The earlier HTTP 403 is resolved.
+- Commits 2130cb8 (build/tests), 6d1755f (fixes/docs), and 2c180e8 (historical handoff)
+  were pushed successfully to both main and maintenance/0.2.2-audit with an atomic, fast-forward push.
+- Remote main now contains the verified maintenance work. No force-push or release tag was used.
+- Transfer artifacts under build/handoff are historical backups; use GitHub for current source.
