@@ -30,11 +30,14 @@ public class ShornedQolClient implements ClientModInitializer {
         Config.load();
         StatsManager.load();
         dev.shorned.qol.waypoint.WaypointManager.load();
+        dev.shorned.qol.waypoint.WaypointRenderer.register();
+        dev.shorned.qol.hud.HudManager.add("waypoint", dev.shorned.qol.waypoint.WaypointNavigation::lines);
 
         ClientReceiveMessageEvents.GAME.register(ChatRouter::onGame);
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             Trackers.tick(mc);
+            dev.shorned.qol.waypoint.WaypointNavigation.tick(mc);
             if (pendingScreen != null) {
                 Screen s = pendingScreen;
                 pendingScreen = null;

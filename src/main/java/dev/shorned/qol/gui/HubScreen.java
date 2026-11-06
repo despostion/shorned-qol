@@ -28,6 +28,8 @@ public class HubScreen extends Screen {
         var s=StatsManager.session();
         if (section.equals("Overview")) {
             lines.add("Area: " + available(MiningTracker.area()) + " | Profile: " + available(MiningTracker.profile()));
+            lines.add("Active waypoint: " + (dev.shorned.qol.waypoint.WaypointManager.active()==null?"none":dev.shorned.qol.waypoint.WaypointManager.active().name));
+            lines.add("Modules: Mining " + Config.get().mining.enabled + " | Fishing " + Config.get().fishing.enabled);
             lines.add("Session " + Fmt.time(s.elapsedMs) + " | Bites " + s.bites + " | Commissions " + s.commissionsDone);
             for (String name : List.of("Mining","Fishing","Settings","Debug & Tools"))
                 action(name, () -> open(new HubScreen(this,name)));
