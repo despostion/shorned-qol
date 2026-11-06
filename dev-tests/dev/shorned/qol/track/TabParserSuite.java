@@ -86,6 +86,17 @@ public class TabParserSuite {
         MiningTracker.applyTab(TabParser.parse(L("Commissions:")), t0 + 61_000);
         check(MiningTracker.commissions().isEmpty(), "commission header with no entries is fresh-empty, not an error");
 
+        MiningTracker.resetTransient();
+        long before = StubStats.c.mithril;
+        MiningTracker.applyTab(TabParser.parse(L("Powders:", "Mithril: 100")), t0);
+        MiningTracker.applyTab(TabParser.parse(L("Powders:", "Mithril: 900")), t0 + 60_000);
+        check(StubStats.c.mithril == before, "tracker: long polling gap re-baselines without an intermediate empty update");
+        MiningTracker.applyTab(TabParser.parse(L("Powders:", "Mithril: 910")), t0 + 61_000);
+        check(StubStats.c.mithril == before + 10, "tracker: gains resume after a polling gap");
+
+        check(TabParser.parse(L("Powders:", "Mithril: 123abc", "Gemstone: 12,", "Glacite: 1,234,56")).powders().isEmpty(),
+                "parser: malformed numeric suffixes are rejected");
+
         System.out.println("TabParserSuite: " + (total - fails) + "/" + total + " passed");
         System.exit(fails == 0 ? 0 : 1);
     }

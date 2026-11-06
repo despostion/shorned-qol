@@ -97,6 +97,8 @@ public final class MiningTracker {
         for (int i = 0; i < 3; i++) {
             Long total = r.powders().get(TYPES[i]);
             if (total != null) {
+                // A pause or disabled tracker can skip every intermediate missing-widget update.
+                if (now - powderSeenAt[i] > STALE_MS) lastTotal[i] = -1;
                 powderSeenAt[i] = now;
                 onPowderTotal(i, total);
             } else if (lastTotal[i] >= 0 && now - powderSeenAt[i] > STALE_MS) {

@@ -96,7 +96,9 @@ public final class SqolCommand {
                 "/sqol reset [session|mining|fishing|lifetime confirm]",
                 "/sqol pos <x> <y>   (or: pos mining|fishing <x> <y>)",
                 "/sqol bite | ability - toggle those alerts",
-                "/sqol debug tab - print the tab list (to verify Powder/Commission parsing)"};
+                "/sqol debug tab - preview up to 60 tab lines",
+                "/sqol debug tab export - save all listed entries to a text file",
+                "/sqol debug tab parsed - show extracted mining data"};
         for (String l : lines) say(c, l);
         return 1;
     }

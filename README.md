@@ -1,30 +1,34 @@
 # Shorned's QoL Mod
 
-Made by **Shorned**. A client-side Fabric mod for Hypixel SkyBlock (Minecraft 26.2, Fabric Loader 0.20.1+).
+Made by **Shorned**. A client-side Fabric mod for Hypixel SkyBlock (Minecraft 26.2, Fabric Loader 0.19.3+).
 Information only: it reads chat, the tab list and nearby entity labels, then shows stats and alerts.
 It never clicks, moves, or plays for you.
 
 ## Install
-1. Install Fabric Loader 0.20.1+ for Minecraft 26.2 and Fabric API.
+1. Install Fabric Loader 0.19.3+ for Minecraft 26.2 and Fabric API.
 2. Put `shorned-qol-<version>.jar` in `.minecraft/mods`.
 
 ## Build
-**Status: v0.2.1 has not been compiled.** See AUDIT.md. Needs JDK 25. The Gradle wrapper is incomplete (only
-`gradle-wrapper.properties`; the jar and scripts could not be generated offline).
-Create it once with Gradle 9.x installed, or copy `gradlew`, `gradlew.bat` and `gradle/wrapper/` from the
-Fabric example mod for 26.2:
+**0.2.2 development build: compiled and automatically tested on Windows with Java 25. Not yet tested in-game.**
+The user reports that 0.2.1 compiled and passed an in-game smoke test; that does not validate 0.2.2.
 
-    gradle wrapper
-    ./gradlew build        # jar -> build/libs/
+Install JDK 25 and make sure `java -version` reports 25. From the repository root in PowerShell:
 
-Versions are in `gradle.properties` (`fabric_version`, `loom_version`). If Gradle cannot resolve them,
-take the newest 26.2 values from https://fabricmc.net/develop .
+```powershell
+.\gradlew.bat clean build
+```
+
+The complete wrapper is included; no global Gradle installation is needed. The first build requires network
+access. Pinned versions: Minecraft 26.2, Loader 0.19.3, Fabric API 0.161.0+26.2, Loom 1.17.17,
+Gradle 9.6.1. Do not replace these versions merely to work around build failures.
+Output: `build/libs/shorned-qol-0.2.2.jar` (the `-sources.jar` is for development, not installation).
+The build runs the dependency-free parser/tracker/export checks as part of `check`.
 
 ## Required Hypixel setup (important)
 Powder totals and commissions come from Hypixel's tab-list widgets, so enable them in SkyBlock:
 `/widgets` (or SkyBlock Menu > Settings > Personal > User Interface > Player List Info) and turn on
-**Powders** and **Commissions**. If you use another mod's "fancy tab", disable it, because this mod
-needs the default tab list. Without the widgets the HUD says "no data" instead of showing zeros.
+**Powders** and **Commissions**. The reader uses network-listed player entries, not pixels from the tab overlay.
+If data is missing, compare an export with other tab-mod features disabled to diagnose interference. Without the widgets the HUD says "no data" instead of showing zeros.
 
 ## Commands
 | Command | What it does |
@@ -57,7 +61,7 @@ counters from your own chat patterns.
 **Mining:** Mithril/Gemstone/Glacite Powder gained and per hour (from the tab Powder widget, chat fallback),
 commission progress bars and completion alerts (tab Commissions widget), pickaxe ability ready/used status.
 **General:** combined or separate HUD, scale, opacity, rounded corners, border, timers, animations, drag editor,
-session and lifetime statistics saved across restarts, atomic saves, corrupt files quarantined not crashed.
+lifetime statistics saved across restarts, optional session persistence, atomic saves, corrupt files quarantined not crashed.
 
 ## Files
 `config/shornedqol.json` (settings) and `config/shornedqol-stats.json` (statistics).
@@ -77,15 +81,23 @@ Timers count *active* time only: not while paused, disconnected, or (if "Idle pa
 with no tracked event. Per-hour rates show `--` for the first 30 seconds.
 
 ## Tests
-`dev-tests/run.sh` runs plain-Java tests of the tab parser and powder/commission freshness logic (Java 21+, no Minecraft).
+`./gradlew.bat clean build` runs all 59 plain-Java checks alongside compilation. To run only these checks
+without downloading Minecraft dependencies, use `powershell -ExecutionPolicy Bypass -File .\dev-tests\run.ps1`
+on Windows, or `bash dev-tests/run.sh` on Linux/macOS with Bash. Both runners use shared test stubs
+(Java 21+); the mod itself requires Java 25. These tests do not simulate a running Minecraft client.
+
+The existing Dwarven Mines fixture is a partial, anonymized transcription with 59 lines, not a complete
+80-entry export. It includes the reported powder/commission rows. The 80-line export test is synthetic.
+Please provide a new `/sqol debug tab export` capture to validate real entry ordering and additional formats.
+Exports keep all listed entries, blank display names and whitespace, with profile-name fallback where no
+display name exists. They use vanilla 26.2 entry ordering and have no 60/80-entry cap. Component colors,
+header/footer text and unlisted network players are not included. Files use UTF-8 and a local timestamp.
 
 ## NOT verified / incomplete (please read)
-- **Not compiled against Minecraft 26.2.** The code was syntax-checked and the regexes tested, but I had no
-  network or Minecraft jars. Expect to fix a few API-name errors on first build; send them to me.
-  Highest-risk calls: `GuiGraphicsExtractor.text/fill/pose()`, `MouseButtonEvent` mouse handlers, `ServerData.ip`,
-  `PlayerInfo.getTeam()/getProfile().name()`, `Player.fishing`, `SimpleSoundInstance.forUI`, `SoundEvents.*`.
-- **Tab line formats are inferred** from how other mods describe the Powder and Commissions widgets. If numbers
-  stay at "no data", run `/sqol debug tab` and send me the output to fix the patterns.
+- **Not tested in-game on 0.2.2.** Compilation verifies API names, not rendering, events or live Hypixel behavior.
+  Smoke-test configuration/HUD editing, alerts, reconnects and `/sqol debug tab export` before release.
+- **Live parsing coverage is limited.** The checked-in partial sample and synthetic edge cases pass; additional
+  areas, active forge slots and full real exports still need validation.
 - **Chat texts are best guesses:** "X is now available!", "You used your X Pickaxe Ability!", "Commission Complete!".
 - **Mining Fatigue timer: not implemented.** I found no reliable source for it, and you asked not to display
   guesses. **Ability cooldown countdown: not implemented** for the same reason; only ready/used is shown.

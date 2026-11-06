@@ -45,7 +45,7 @@ public final class TabParser {
     private static final Pattern COLUMN_TITLE = Pattern.compile("^(?:Info|Players \\(\\d+\\))$");
     // 16,510 | 525683 ; rejects malformed groupings such as "1,23" instead of reading part of them.
     private static final Pattern POWDER = Pattern.compile(
-            "^(Mithril|Gemstone|Glacite)(?: Powder)?:\\s*(\\d{1,3}(?:,\\d{3})+|\\d+)(?![\\d,]*\\d|\\.\\d)");
+            "^(Mithril|Gemstone|Glacite)(?: Powder)?:\\s*(\\d{1,3}(?:,\\d{3})+|\\d+)$");
     private static final Pattern COMMISSION = Pattern.compile(
             "^(.+?):\\s*(?:(\\d+(?:\\.\\d+)?)\\s*%|(DONE))\\s*$", Pattern.CASE_INSENSITIVE);
     private static final Pattern KEY_AREA = Pattern.compile("^Area:\\s*(\\S.*)$");

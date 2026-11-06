@@ -1,6 +1,17 @@
 # Changelog
 
-## 0.2.2 (tests pass outside Minecraft; the Minecraft-facing code is NOT compiled or tested in game)
+## 0.2.2 (development; build verified, not yet tested in-game)
+
+Maintenance verification: 2026-11-06, Windows, Microsoft OpenJDK 25.0.4.1.
+- Restored the complete Gradle 9.6.1 wrapper with distribution checksum verification.
+- Removed generated `bin/main` output and local VS Code settings from version control; local copies retained.
+- Added a PowerShell test runner and shared test stubs; all 59 checks now run during Gradle `check`/`build`.
+- Tab reading now includes server list-order and spectator sorting before team/name sorting, matching 26.2.
+  Export uses a profile name when the display name is absent; explicit blank display names remain blank.
+- Added export/parsed commands to help text.
+- Fixed false powder gains after long polling gaps and rejected malformed numeric suffixes.
+- Confirmed existing `gui.setScreen`, `gui.screen`, `gui.hud.isHidden` and `sendSystemMessage` API fixes compile.
+
 - `/sqol debug tab export`: writes every tab-list entry (order and blank lines kept, plain text) to
   `config/shorned-qol/debug/tab-list-<yyyy-MM-dd-HHmmss>.txt`. File I/O runs on a worker thread; the chat message
   with the path is posted back on the client thread. Same-second exports get a `-2`, `-3` suffix, never overwrite.
@@ -10,10 +21,10 @@
   section, and rejects malformed numbers ("1,23", "1.5.2", negatives) instead of half-reading them.
 - MiningTracker exposes area/profile/forges with the same 10 s freshness rule, and skips re-parsing when the tab
   list has not changed between refreshes.
-- Tests: 16 existing (unchanged) + 40 new, see dev-tests/.
+- Original 0.2.2 test coverage: 16 parser/tracker checks + 40 extended checks; maintenance adds 3 regressions.
 - Build config set to the versions you reported (Loader 0.19.3, Loom 1.17.17, Gradle 9.6.1 wrapper URL).
 
-## 0.2.1 (unreleased, NOT build-verified against Minecraft 26.2)
+## 0.2.1 (historical; user reports successful build and in-game smoke test)
 Reliability pass on tracking. See AUDIT.md for the full findings.
 - Powder: `powderTracked()` now means "read from the tab list in the last 10 s", tracked per powder type. When the
   widget disappears the baseline is dropped, so powder earned while it was hidden is never counted as one jump
