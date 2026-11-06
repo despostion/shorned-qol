@@ -28,3 +28,10 @@ mapping and pre-existing tracker issues. No catch/Double Hook/profit figures are
 
 GitHub write access is working. Push only the development branch, and use a draft PR against main.
 The old local main at 1adc142 is historical and diverges from origin/main; do not reset or force-push it.
+
+## Delivery
+
+- Phase 5 commit: 2ba3704. All five implementation commits pushed to the development branch.
+- Draft PR: https://github.com/despostion/shorned-qol/pull/1 (do not merge before manual validation).
+- Main was not changed by this milestone.
+- Verified development JAR SHA-256: 91eccb2d1f01d2db35fae17f1e35515cb19bee9741e5ca745cd7ea4490ee9a08.
