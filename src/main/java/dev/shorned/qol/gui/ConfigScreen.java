@@ -38,6 +38,8 @@ public class ConfigScreen extends Screen {
         this.parent = parent;
     }
 
+    public ConfigScreen(Screen parent, String category) { this(parent); current = Cat.valueOf(category.toUpperCase(java.util.Locale.ROOT)); }
+
     // ------------------------------------------------------------------ layout
 
     @Override

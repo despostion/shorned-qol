@@ -63,5 +63,6 @@ public class ShornedQolClient implements ClientModInitializer {
                 HudRenderer::render);
 
         ClientCommandRegistrationCallback.EVENT.register(SqolCommand::register);
+        ClientCommandRegistrationCallback.EVENT.register(dev.shorned.qol.command.ShornedCommand::register);
     }
 }
