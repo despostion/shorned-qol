@@ -38,3 +38,27 @@ java {
     sourceCompatibility = JavaVersion.VERSION_25
     targetCompatibility = JavaVersion.VERSION_25
 }
+
+// Keep parser/tracker checks independent of Minecraft and external test libraries.
+def parserTestClasses = layout.buildDirectory.dir('parser-test-classes')
+tasks.register('compileParserTests', JavaCompile) {
+    source fileTree('dev-tests/dev') { include '**/*.java' }
+    source fileTree('dev-tests/stubs') { include '**/*.java' }
+    source files('src/main/java/dev/shorned/qol/track/TabParser.java',
+            'src/main/java/dev/shorned/qol/track/MiningTracker.java',
+            'src/main/java/dev/shorned/qol/util/TabExport.java')
+    classpath = files()
+    destinationDirectory = parserTestClasses
+}
+tasks.register('parserTest', JavaExec) {
+    dependsOn 'compileParserTests'
+    classpath = files(parserTestClasses)
+    mainClass = 'dev.shorned.qol.track.ParserTest'
+}
+tasks.register('tabParserSuite', JavaExec) {
+    dependsOn 'compileParserTests'
+    classpath = files(parserTestClasses)
+    mainClass = 'dev.shorned.qol.track.TabParserSuite'
+    args file('dev-tests/resources/dwarven-mines-sample.txt').absolutePath
+}
+tasks.named('check') { dependsOn 'parserTest', 'tabParserSuite' }

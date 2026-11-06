@@ -23,22 +23,22 @@ public class ParserTest {
         // freshness
         long t = 1_000_000;
         MiningTracker.applyTab(TabParser.parse(List.of("Powders:", "Mithril: 100")), t);
-        check(StubStats.mithril == 0, "first reading is baseline only");
+        check(StubStats.c.mithril == 0, "first reading is baseline only");
         MiningTracker.applyTab(TabParser.parse(List.of("Powders:", "Mithril: 150")), t + 1000);
-        check(StubStats.mithril == 50, "increase counted");
+        check(StubStats.c.mithril == 50, "increase counted");
         MiningTracker.applyTab(TabParser.parse(List.of()), t + 5000);
         check(true, "widget missing <10s: still within freshness window");
         MiningTracker.applyTab(TabParser.parse(List.of()), t + 20_000);
         MiningTracker.applyTab(TabParser.parse(List.of("Powders:", "Mithril: 900")), t + 21_000);
-        check(StubStats.mithril == 50, "reappearing widget re-baselines (no giant jump)");
+        check(StubStats.c.mithril == 50, "reappearing widget re-baselines (no giant jump)");
         MiningTracker.applyTab(TabParser.parse(List.of("Powders:", "Mithril: 910")), t + 22_000);
-        check(StubStats.mithril == 60, "tracking resumes after re-baseline");
+        check(StubStats.c.mithril == 60, "tracking resumes after re-baseline");
 
         MiningTracker.applyTab(TabParser.parse(List.of("Commissions:", "Goblin: 90%")), t + 23_000);
         MiningTracker.applyTab(TabParser.parse(List.of("Commissions:", "Goblin: DONE")), t + 24_000);
-        check(StubStats.commissions == 1, "commission completion counted once");
+        check(StubStats.c.commissionsDone == 1, "commission completion counted once");
         MiningTracker.applyTab(TabParser.parse(List.of("Commissions:", "Goblin: DONE")), t + 25_000);
-        check(StubStats.commissions == 1, "repeat DONE update not double counted");
+        check(StubStats.c.commissionsDone == 1, "repeat DONE update not double counted");
         System.exit(fails == 0 ? 0 : 1);
     }
 }
