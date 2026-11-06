@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.0-dev (development branch; not a release)
+
+- Added `/shorned` router and paginated, keyboard-accessible overview/module/settings/debug screens;
+  retained `/sqol` compatibility commands and original trackers/statistics.
+- Added independently configured widgets, normalized positions, drag grid, overlap rejection,
+  per-widget appearance forms and reset. Retained legacy layout/settings during migration.
+- Added original waypoint model, bounded versioned storage, creation/editing, groups, filtering,
+  sorting, visibility, active selection and confirmation flows.
+- Added 26.2 Fabric extraction/submit world markers, labels, optional pillars, scoped visibility,
+  depth-tested default rendering and HUD navigation with optional arrival notifications.
+- Added native JSON and Skyblocker V1 share conversion, validation/size limits, append confirmation,
+  retained compatibility metadata and explicit conversion limitations.
+- Added safe asynchronous folder/debug export actions; no automatic uploads or arbitrary path execution.
+- Added 40 milestone regression checks. All 99 checks and Java 25 clean build pass.
+- In-game GUI/rendering verification is still required. No merge to main or release tag.
+
 ## 0.2.2 (development; build verified, not yet tested in-game)
 
 Maintenance verification: 2026-11-06, Windows, Microsoft OpenJDK 25.0.4.1.

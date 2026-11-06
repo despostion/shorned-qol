@@ -1,88 +1,142 @@
 package dev.shorned.qol.hud;
 
 import dev.shorned.qol.config.Config;
+import java.util.*;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
-/** Drag-to-position editor. Panels show sample numbers so you can judge size and placement. */
-public class HudEditorScreen extends Screen {
-    private final Screen parent;
-    private HudRenderer.Panel dragging;
-    private int offX, offY;
+public final class HudEditorScreen extends Screen {
+  private final Screen parent;
+  private String selected = "mithril", drag;
+  private double ox, oy;
+  private double originalX, originalY;
+  private String notice = "";
 
-    public HudEditorScreen(Screen parent) {
-        super(Component.literal("Shorned's QoL - HUD editor"));
-        this.parent = parent;
+  public HudEditorScreen(Screen parent) {
+    super(Component.literal("Shorned HUD editor"));
+    this.parent = parent;
+  }
+
+  @Override
+  protected void init() {
+    int w = Math.min(460, width - 12), x = (width - w) / 2;
+    addRenderableWidget(
+        Button.builder(
+                Component.literal("Select: " + selected),
+                b -> {
+                  var ids = new ArrayList<>(HudManager.WIDGETS.keySet());
+                  selected = ids.get((ids.indexOf(selected) + 1) % ids.size());
+                  rebuildWidgets();
+                })
+            .bounds(x, height - 48, w / 2 - 2, 20)
+            .build());
+    addRenderableWidget(
+        Button.builder(
+                Component.literal("Appearance / visibility"),
+                b -> minecraft.gui.setScreen(new WidgetSettingsScreen(this, selected)))
+            .bounds(x + w / 2, height - 48, w / 2, 20)
+            .build());
+    addRenderableWidget(
+        Button.builder(Component.literal("Save & back"), b -> onClose())
+            .bounds(x, height - 24, w / 2 - 2, 20)
+            .build());
+    addRenderableWidget(
+        Button.builder(
+                Component.literal("Legacy layout editor"),
+                b -> minecraft.gui.setScreen(new LegacyHudEditorScreen(this)))
+            .bounds(x + w / 2, height - 24, w / 2, 20)
+            .build());
+  }
+
+  @Override
+  public void extractRenderState(GuiGraphicsExtractor g, int x, int y, float dt) {
+    HudManager.render(g, true);
+    super.extractRenderState(g, x, y, dt);
+    g.text(
+        font,
+        "Drag widgets. Grey = disabled. Positions snap to a 4px grid.",
+        6,
+        4,
+        0xFFFFB347,
+        true);
+    g.text(font, notice, 6, 16, 0xFFFFB347, true);
+    var b = HudManager.bounds.get(selected);
+    if (b != null) {
+      g.fill(b[0], b[1], b[0] + b[2], b[1] + 2, 0xFFFFB347);
     }
+  }
 
-    @Override
-    protected void init() {
-        int cx = this.width / 2;
-        Config.Hud hud = Config.get().hud;
-        this.addRenderableWidget(Button.builder(Component.literal("Mode: " + hud.mode), b -> {
-            hud.mode = hud.mode == Config.HudMode.COMBINED ? Config.HudMode.SEPARATE : Config.HudMode.COMBINED;
-            Config.save();
-            HudRenderer.rebuild();
-            this.rebuildWidgets();
-        }).bounds(cx - 100, this.height - 54, 200, 20).build());
-        this.addRenderableWidget(Button.builder(Component.literal("Reset positions"), b -> {
-            HudRenderer.resetPositions();
-        }).bounds(cx - 100, this.height - 30, 95, 20).build());
-        this.addRenderableWidget(Button.builder(Component.literal("Done"), b -> this.onClose())
-                .bounds(cx + 5, this.height - 30, 95, 20).build());
+  @Override
+  public boolean mouseClicked(MouseButtonEvent e, boolean d) {
+    if (super.mouseClicked(e, d)) return true;
+    if (e.button() != 0) return false;
+    var ids = new ArrayList<>(HudManager.bounds.keySet());
+    Collections.reverse(ids);
+    for (String id : ids) {
+      int[] b = HudManager.bounds.get(id);
+      if (e.x() >= b[0] && e.x() <= b[0] + b[2] && e.y() >= b[1] && e.y() <= b[1] + b[3]) {
+        selected = drag = id;
+        originalX = HudManager.config(id).x;
+        originalY = HudManager.config(id).y;
+        ox = e.x() - b[0];
+        oy = e.y() - b[1];
+        return true;
+      }
     }
+    return false;
+  }
 
-    @Override
-    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
-        super.extractRenderState(g, mouseX, mouseY, delta);
-        HudRenderer.renderPreview(g);
-        String hint = "Drag a panel to move it. Scale, opacity and sections are in /sqol config.";
-        g.text(this.font, hint, (this.width - this.font.width(hint)) / 2, this.height - 74, 0xFFFFFFFF, true);
-    }
+  @Override
+  public boolean mouseDragged(MouseButtonEvent e, double dx, double dy) {
+    if (drag == null) return super.mouseDragged(e, dx, dy);
+    var b = HudManager.bounds.get(drag);
+    var c = HudManager.config(drag);
+    c.x = Math.clamp(Math.round((e.x() - ox) / 4) * 4.0 / Math.max(1, width - b[2]), 0, 1);
+    c.y = Math.clamp(Math.round((e.y() - oy) / 4) * 4.0 / Math.max(1, height - b[3]), 0, 1);
+    return true;
+  }
 
-    @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() == 0) {
-            for (HudRenderer.Panel p : HudRenderer.editablePanels()) {
-                int[] b = HudRenderer.bounds(p);
-                if (b != null && event.x() >= b[0] && event.x() <= b[0] + b[2]
-                        && event.y() >= b[1] && event.y() <= b[1] + b[3]) {
-                    dragging = p;
-                    offX = (int) event.x() - b[0];
-                    offY = (int) event.y() - b[1];
-                    return true;
-                }
-            }
+  @Override
+  public boolean mouseReleased(MouseButtonEvent e) {
+    if (drag != null) {
+      var moving = HudManager.bounds.get(drag);
+      boolean overlap = false;
+      for (var entry : HudManager.bounds.entrySet()) {
+        if (entry.getKey().equals(drag) || !HudManager.config(entry.getKey()).enabled) continue;
+        var b = entry.getValue();
+        if (moving[0] < b[0] + b[2]
+            && moving[0] + moving[2] > b[0]
+            && moving[1] < b[1] + b[3]
+            && moving[1] + moving[3] > b[1]) {
+          overlap = true;
+          break;
         }
-        return super.mouseClicked(event, doubleClick);
+      }
+      if (overlap) {
+        var c = HudManager.config(drag);
+        c.x = originalX;
+        c.y = originalY;
+        notice = "Move cancelled: overlaps an enabled widget.";
+      } else notice = "Position saved";
+      drag = null;
+      Config.save();
+      rebuildWidgets();
+      return true;
     }
+    return super.mouseReleased(e);
+  }
 
-    @Override
-    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
-        if (dragging != null) {
-            HudRenderer.setPos(dragging, Math.max(0, (int) event.x() - offX), Math.max(0, (int) event.y() - offY));
-            return true;
-        }
-        return super.mouseDragged(event, dx, dy);
-    }
+  @Override
+  public void onClose() {
+    Config.save();
+    minecraft.gui.setScreen(parent);
+  }
 
-    @Override
-    public boolean mouseReleased(MouseButtonEvent event) {
-        if (dragging != null) {
-            dragging = null;
-            Config.save();
-            return true;
-        }
-        return super.mouseReleased(event);
-    }
-
-    @Override
-    public void onClose() {
-        Config.save();
-        HudRenderer.rebuild();
-        this.minecraft.gui.setScreen(parent);
-    }
+  @Override
+  public boolean isPauseScreen() {
+    return false;
+  }
 }
