@@ -29,6 +29,8 @@ public class Config {
     public static boolean recoveredFromCorruption = false;
 
     public int configVersion = 2;
+    public boolean modularHud = true;
+    public java.util.Map<String, dev.shorned.qol.hud.WidgetConfig> widgets = new java.util.LinkedHashMap<>();
     public General general = new General();
     public Hud hud = new Hud();
     public Mining mining = new Mining();
@@ -104,6 +106,7 @@ public class Config {
     public static void load() {
         if (!Files.exists(FILE)) {
             instance = new Config();
+            instance.configVersion=3;
             save();
             return;
         }
@@ -145,6 +148,11 @@ public class Config {
         notifications.biteSoundType = Math.max(0, Math.min(4, notifications.biteSoundType));
         general.idleTimeoutSeconds = Math.max(0, Math.min(3600, general.idleTimeoutSeconds));
         fishing.maxBobberDistance = Math.max(1.0, Math.min(10.0, fishing.maxBobberDistance));
-        configVersion = 2;
+        if(widgets==null) widgets=new java.util.LinkedHashMap<>();
+        widgets.values().removeIf(java.util.Objects::isNull);
+        widgets.values().forEach(dev.shorned.qol.hud.WidgetConfig::sanitize);
+        // Retain the exact legacy layout for existing installations until they opt into widgets.
+        if(configVersion<3) modularHud=false;
+        configVersion = 3;
     }
 }

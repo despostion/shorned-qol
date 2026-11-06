@@ -101,6 +101,7 @@ public final class HudRenderer {
 
     /** Rebuilds the cached rows from live statistics. */
     public static void rebuild() {
+        HudManager.refresh();
         LIVE.clear();
         if (shownProgress.size() > 64) shownProgress.clear();
         for (Panel p : visiblePanels()) LIVE.put(p, build(p, StatsManager.session(), false));
@@ -222,8 +223,9 @@ public final class HudRenderer {
         Minecraft mc = Minecraft.getInstance();
         Config cfg = Config.get();
         if (!cfg.general.enabled || mc.gui.hud.isHidden() || mc.player == null) return;
-        if (mc.gui.screen() instanceof HudEditorScreen) return;           // the editor draws its own preview
+        if (mc.gui.screen() instanceof HudEditorScreen || mc.gui.screen() instanceof LegacyHudEditorScreen) return;           // the editor draws its own preview
 
+        if (cfg.modularHud) { HudManager.render(g,false); drawAlerts(g,mc); return; }
         if (cfg.hud.enabled) {
             BOUNDS.clear();
             for (Map.Entry<Panel, Model> e : LIVE.entrySet()) drawModel(g, mc, e.getKey(), e.getValue());

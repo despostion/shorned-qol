@@ -32,6 +32,7 @@ public class HubScreen extends Screen {
             for (String name : List.of("Mining","Fishing","Settings","Debug & Tools"))
                 action(name, () -> open(new HubScreen(this,name)));
             action("HUD Editor", () -> open(new HudEditorScreen(this)));
+            action("Modular HUD: " + Config.get().modularHud, () -> {Config.get().modularHud=!Config.get().modularHud;Config.save();rebuildWidgets();});
         } else if (section.equals("Mining") || section.equals("Fishing")) {
             boolean mining=section.equals("Mining");
             lines.add(mining ? "Powder gained: " + s.mithril + " / " + s.gemstone + " / " + s.glacite : "Bites: " + s.bites + " | Sea creatures: " + s.seaCreatures + " | Kills: " + s.seaKills);
