@@ -1,105 +1,127 @@
-# Shorned's QoL Mod
+# Shorned's QoL — 0.3.0 development
 
-Made by **Shorned**. A client-side Fabric mod for Hypixel SkyBlock (Minecraft 26.2, Fabric Loader 0.19.3+).
-Information only: it reads chat, the tab list and nearby entity labels, then shows stats and alerts.
-It never clicks, moves, or plays for you.
+A client-side, information-only Fabric mod for Hypixel SkyBlock. No gameplay automation.
+This branch introduces a unified interface, independently configurable HUD widgets and an original
+waypoint system. **Development build: compiled and automatically tested, not tested in-game.**
 
-## Install
-1. Install Fabric Loader 0.19.3+ for Minecraft 26.2 and Fabric API.
-2. Put `shorned-qol-<version>.jar` in `.minecraft/mods`.
+## Build and install
 
-## Build
-**0.2.2 development build: compiled and automatically tested on Windows with Java 25. Not yet tested in-game.**
-The user reports that 0.2.1 compiled and passed an in-game smoke test; that does not validate 0.2.2.
-
-Install JDK 25 and make sure `java -version` reports 25. From the repository root in PowerShell:
+Pinned environment: Minecraft **26.2**, Fabric Loader **0.19.3**, Fabric API **0.161.0+26.2**,
+Loom **1.17.17**, Gradle **9.6.1**, Java **25**. The complete Gradle wrapper is included.
 
 ```powershell
+java -version
 .\gradlew.bat clean build
 ```
 
-The complete wrapper is included; no global Gradle installation is needed. The first build requires network
-access. Pinned versions: Minecraft 26.2, Loader 0.19.3, Fabric API 0.161.0+26.2, Loom 1.17.17,
-Gradle 9.6.1. Do not replace these versions merely to work around build failures.
-Output: `build/libs/shorned-qol-0.2.2.jar` (the `-sources.jar` is for development, not installation).
-The build runs the dependency-free parser/tracker/export checks as part of `check`.
+Install Fabric and Fabric API for this Minecraft version, then put
+`build/libs/shorned-qol-0.3.0-dev.jar` in your mods folder. Do not install the sources JAR.
+The first build needs network access. Do not downgrade dependencies to bypass a build failure.
 
-## Required Hypixel setup (important)
-Powder totals and commissions come from Hypixel's tab-list widgets, so enable them in SkyBlock:
-`/widgets` (or SkyBlock Menu > Settings > Personal > User Interface > Player List Info) and turn on
-**Powders** and **Commissions**. The reader uses network-listed player entries, not pixels from the tab overlay.
-If data is missing, compare an export with other tab-mod features disabled to diagnose interference. Without the widgets the HUD says "no data" instead of showing zeros.
+## Interface and commands
 
-## Commands
-| Command | What it does |
+| Command | Action |
 |---|---|
-| `/sqol` | Version and on/off status |
-| `/sqol help` | Command list |
-| `/sqol config` | Open the settings screen |
-| `/sqol hud` | Toggle the HUD |
-| `/sqol hud edit` | Drag-to-move editor with sample data (preview mode) |
-| `/sqol hud mode combined\|separate` | One panel, or separate Mining and Fishing panels |
-| `/sqol hud scale <0.5-3>` / `opacity <0-100>` / `reset` | Appearance and positions |
-| `/sqol mining` / `/sqol fishing` | Toggle a tracker |
-| `/sqol mining reset` / `/sqol fishing reset` | Reset that tracker's session |
-| `/sqol stats [session\|lifetime]` | Print statistics |
-| `/sqol reset [session\|mining\|fishing]` | Reset session stats |
-| `/sqol reset lifetime confirm` | Erase lifetime stats |
-| `/sqol pos <x> <y>` / `pos mining\|fishing <x> <y>` | Set HUD position |
-| `/sqol bite` / `/sqol ability` | Toggle those alerts |
-| `/sqol fishing recent` | Chat lines seen in the 30 s after your last bite |
-| `/sqol fishing pattern add spawn\|kill <regex>` | Add a sea creature pattern |
-| `/sqol fishing pattern list` / `clear spawn\|kill` | Manage patterns |
-| `/sqol debug tab` | Print up to 60 tab lines in chat |
-| `/sqol debug tab export` | Save every tab line to `config/shorned-qol/debug/tab-list-<timestamp>.txt` |
-| `/sqol debug tab parsed` | Show what the parser extracted (area, profile, powders, commissions, forges) |
+| `/shorned` | Overview and navigation hub |
+| `/shorned mining` / `fishing` | Statistics, module toggle, settings and confirmed session reset |
+| `/shorned hud` | Visual widget editor |
+| `/shorned waypoint` | Waypoint manager |
+| `/shorned waypoint add` | Prefilled creation form at current player coordinates; coordinates are editable |
+| `/shorned waypoint list` | List saved waypoints |
+| `/shorned waypoint clear` | Open a deletion confirmation |
+| `/shorned settings` | General settings, notifications and legacy settings |
+| `/shorned debug` | Parser/tracker status, exports, folder tools and captured fishing chat |
+| `/shorned help` | Command summary |
 
-## Features
-**Fishing:** bite detection (counted once per "!!!" label, only near *your* bobber), configurable sound
-(5 choices) and volume, BITE! banner, optional screen flash, bites and bites/hr, sea creature spawn and kill
-counters from your own chat patterns.
-**Mining:** Mithril/Gemstone/Glacite Powder gained and per hour (from the tab Powder widget, chat fallback),
-commission progress bars and completion alerts (tab Commissions widget), pickaxe ability ready/used status.
-**General:** combined or separate HUD, scale, opacity, rounded corners, border, timers, animations, drag editor,
-lifetime statistics saved across restarts, optional session persistence, atomic saves, corrupt files quarantined not crashed.
+`/sqol` and its existing commands remain available, including stats/reset, fishing recognition patterns,
+HUD appearance controls and `/sqol debug tab [export|parsed]`. Legacy appearance controls affect the
+legacy HUD. Use the new editor for modular widgets.
 
-## Files
-`config/shornedqol.json` (settings) and `config/shornedqol-stats.json` (statistics).
-Settings: General (enabled, only on Hypixel, idle pause, keep session), HUD (enabled, mode, scale, opacity,
-rounded, border, timers, animations, section toggles, positions), Mining, Fishing (incl. `spawnPatterns`,
-`killPatterns`, `maxBobberDistance`), Notifications (sounds, volume, banners, flash). All are also in the
-in-game screen except the pattern lists, which use the `/sqol fishing pattern` commands.
+The new hub and forms use consistent dark/gold styling, Back/Cancel controls, keyboard-focusable
+Minecraft widgets, Previous/Next buttons and mouse-wheel paging. Form drafts survive paging and
+resize; Cancel discards them. Settings changes save immediately. Overview values are snapshots when
+opened; gameplay HUD values refresh approximately four times per second.
 
-## Setting up the sea creature counter
-The counters stay hidden until you add patterns. Catch a sea creature, run `/sqol fishing recent`, then add a
-regex for the line, e.g. `/sqol fishing pattern add spawn ^You caught a Squid`. Use `kill` for kill messages.
+## Modular HUD
 
-## Time tracking
-`/sqol stats` shows *active* and *elapsed (connected)* time separately; the HUD timer is active time and shows
-"(idle)" when idle-pause has stopped it. With idle pause off (default) active time runs whenever you are connected.
-Timers count *active* time only: not while paused, disconnected, or (if "Idle pause" is set) after N seconds
-with no tracked event. Per-hour rates show `--` for the first 30 seconds.
+The hub's **Modular HUD** toggle selects the new widget system. Existing version-2 configurations
+retain the exact old layout initially; enable the new mode when ready. Old configuration fields,
+tracker settings and pattern lists are retained. New installations enable the modular system.
 
-## Tests
-`./gradlew.bat clean build` runs all 59 plain-Java checks alongside compilation. To run only these checks
-without downloading Minecraft dependencies, use `powershell -ExecutionPolicy Bypass -File .\dev-tests\run.ps1`
-on Windows, or `bash dev-tests/run.sh` on Linux/macOS with Bash. Both runners use shared test stubs
-(Java 21+); the mod itself requires Java 25. These tests do not simulate a running Minecraft client.
+Widgets: Mithril/Gemstone/Glacite gained, powder rates, commissions, raw forge status, mining session,
+pickaxe ability status, fishing bites/rate, sea creature counts, fishing session, coordinates, area,
+connected session, current notifications and active waypoint navigation. Bites are **not catches**.
+There are no invented catch, Double Hook, profit or forge countdown statistics.
 
-The existing Dwarven Mines fixture is a partial, anonymized transcription with 59 lines, not a complete
-80-entry export. It includes the reported powder/commission rows. The 80-line export test is synthetic.
-Please provide a new `/sqol debug tab export` capture to validate real entry ordering and additional formats.
-Exports keep all listed entries, blank display names and whitespace, with profile-name fallback where no
-display name exists. They use vanilla 26.2 entry ordering and have no 60/80-entry cap. Component colors,
-header/footer text and unlisted network players are not included. Files use UTF-8 and a local timestamp.
+In the editor, select by clicking a widget or cycling Select. Drag on a 4-pixel grid; a drop overlapping
+an enabled widget is cancelled. Disabled widgets appear grey for preview and can be re-enabled through
+Appearance/visibility. Each widget has its own scale, opacity, RGB text/background colors, background,
+border, padding, spacing, normalized position and reset action. Positions clamp to the viewport.
+The editor itself is excluded from the gameplay HUD. The legacy editor remains available.
 
-## NOT verified / incomplete (please read)
-- **Not tested in-game on 0.2.2.** Compilation verifies API names, not rendering, events or live Hypixel behavior.
-  Smoke-test configuration/HUD editing, alerts, reconnects and `/sqol debug tab export` before release.
-- **Live parsing coverage is limited.** The checked-in partial sample and synthetic edge cases pass; additional
-  areas, active forge slots and full real exports still need validation.
-- **Chat texts are best guesses:** "X is now available!", "You used your X Pickaxe Ability!", "Commission Complete!".
-- **Mining Fatigue timer: not implemented.** I found no reliable source for it, and you asked not to display
-  guesses. **Ability cooldown countdown: not implemented** for the same reason; only ready/used is shown.
-- **Sea creature counters need your patterns** (above); I do not know Hypixel's exact messages.
-- Mod Menu integration is not included; use `/sqol config`.
+Alerts and legacy tracker functionality remain intact. Enable Hypixel's Powder and Commissions tab
+widgets for mining data. Per-hour rates use active tracker time and show unavailable for the first
+30 seconds. Sea creature recognition still requires patterns; the fishing settings GUI can add/remove
+those patterns. Missing forge/area/navigation data is labeled unavailable rather than fabricated.
+
+## Waypoints
+
+Independent of Skyblocker; no dependency added. Each saved point has a UUID, name, coordinates, RGB
+color, BOX/POINT/RING marker, visibility, description, group, world/server, dimension and optional area.
+Create/edit in the GUI, search names/groups, sort by name or distance, hide groups, select navigation,
+stop navigation and confirm deletion. Maximum: 500 saved points. A world must be joined to prefill a
+new point. Native records require world/dimension binding; blank area means any area within that scope.
+
+World rendering uses Fabric 26.2 extraction and submit events with independent render snapshots.
+Markers show distance and nearby coordinate labels; an optional 32-block pillar is available.
+Depth-tested rendering is the default. Through-wall mode requires explicitly enabling it for a point.
+The default range is 512 blocks, configurable from 16 to 4096, with a cap of 128 submitted points per
+frame. The navigation widget shows name, distance, coordinates and relative direction in degrees.
+Optional arrival messages fire within 3 blocks, re-arm beyond 8 blocks and never change selection.
+
+**Rendering, occlusion, camera behavior and interactions with other renderers still need in-game tests.**
+Area binding depends on fresh tab data. Singleplayer scope currently uses the saved world's name;
+worlds with identical names should use distinct names or manually distinct scope identifiers.
+
+## Import/export
+
+Native format: versioned UTF-8 JSON in `config/shorned-qol/waypoints.json`. Native exports retain all
+fields. Files are written atomically; invalid existing storage is preserved and saving is blocked rather
+than replacing it. Imports are validated first, then appended after confirmation with fresh UUIDs.
+They never overwrite existing points or change the selected waypoint. Imported through-wall mode is
+always disabled. Imports are limited to 1 MB expanded data and 500 total points.
+
+The manager's Import/export screen accepts native JSON or **Skyblocker V1** clipboard data and files
+from `config/shorned-qol/imports/` (filename only). Native exports create new files under `exports/`.
+Skyblocker export copies a share string to the clipboard; decimal coordinates are rejected instead of
+silently rounded.
+
+Compatibility was checked against Skyblocker's public `Waypoints`, `WaypointGroup` and `NamedWaypoint`
+codecs: `[Skyblocker-Waypoint-Data-V1]` + Base64 + gzip + JSON group array. Conversion is original code.
+Names, integer coordinates, RGB colors, enabled state and group names are shared. Imported groups bind
+to the **current world/dimension/area**; the original island and unsupported source fields remain in native
+metadata. Ordered routes are not executed; group render types are mapped to this mod's markers. Plain
+names and literal text components are supported; translated names are rejected, and rich text styling
+is not displayed. Skyblocker export uses independent one-point groups, no automatic route order, and
+`unknown` island for points without imported island metadata. Legacy/Skytils/Coleweight formats are not
+supported. No compatibility is claimed with uninspected future versions.
+
+## Debug and files
+
+- Existing config: `config/shornedqol.json`; statistics: `config/shornedqol-stats.json`.
+- Waypoints and new tools: `config/shorned-qol/`.
+- Tab exports: `config/shorned-qol/debug/`, all listed entries, no 60/80-entry cap.
+- Exports retain text order/whitespace/blank names; Component styling and tab header/footer are excluded.
+- Diagnostics stay local. No uploads. Folder actions accept no arbitrary path and validate real paths
+  within the designated mod directory before opening Explorer or a supported platform fallback.
+- Recent fishing chat is a capture around bites, **not a viewer for the complete Minecraft log**.
+
+## Validation and remaining work
+
+`clean build` runs 16 original parser/tracker checks, 43 extended parser/export checks and 40 milestone
+checks (99 total). Milestone tests cover native persistence, invalid data, scope/group behavior, distance,
+bearing, import conversion/limits, config migration, widget round trips and command parsing. Standalone
+legacy parser tests remain available through `powershell -ExecutionPolicy Bypass -File .\dev-tests\run.ps1`.
+
+No in-game validation or release tag yet. See [AUDIT.md](AUDIT.md) for the manual test matrix and known
+limitations, [CHANGELOG.md](CHANGELOG.md) for changes, and [CONTEXT.md](CONTEXT.md) for maintainer continuity.

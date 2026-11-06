@@ -62,3 +62,17 @@ tasks.register('tabParserSuite', JavaExec) {
     args file('dev-tests/resources/dwarven-mines-sample.txt').absolutePath
 }
 tasks.named('check') { dependsOn 'parserTest', 'tabParserSuite' }
+
+// Production-model integration checks use the resolved Gson/Fabric classpath, no game launch.
+tasks.register('compileMilestoneTests', JavaCompile) {
+    dependsOn 'classes'
+    source fileTree('dev-tests/integration') { include '**/*.java' }
+    classpath = sourceSets.main.runtimeClasspath
+    destinationDirectory = layout.buildDirectory.dir('milestone-test-classes')
+}
+tasks.register('milestoneTest', JavaExec) {
+    dependsOn 'compileMilestoneTests'
+    classpath = files(layout.buildDirectory.dir('milestone-test-classes')) + sourceSets.main.runtimeClasspath
+    mainClass = 'dev.shorned.qol.MilestoneTest'
+}
+tasks.named('check') { dependsOn 'milestoneTest' }
